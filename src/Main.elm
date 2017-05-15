@@ -1,6 +1,8 @@
 module Main exposing (..)
 
-import Html exposing (..)
+import Html exposing (Html, program, section, input, text, p)
+import Html.Attributes exposing (type_, style, accept)
+import Html.Events exposing (on)
 import Native.FileReader
 
 
@@ -41,11 +43,40 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        test =
-            Native.FileReader.test ()
-    in
-        text test
+    section
+        [ sectionStyles ]
+        [ imageView model.imageBinary
+        , input
+            [ type_ "file"
+            , accept "image/*"
+            ]
+            []
+        ]
+
+
+sectionStyles : Html.Attribute Msg
+sectionStyles =
+    style
+        [ ( "height", "100vh" )
+        , ( "display", "flex" )
+        , ( "justify-content", "center" )
+        , ( "align-items", "center" )
+        , ( "flex-direction", "column" )
+        ]
+
+
+imageView : Maybe String -> Html Msg
+imageView maybeImageBinary =
+    case maybeImageBinary of
+        Just imageBinary ->
+            p
+                []
+                [ text "Image will be rendered here" ]
+
+        Nothing ->
+            p
+                []
+                [ text "No image selected yet" ]
 
 
 
