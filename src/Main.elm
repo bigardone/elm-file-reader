@@ -1,21 +1,30 @@
 module Main exposing (..)
 
-import Html exposing (Html, program, section, input, text, p)
-import Html.Attributes exposing (type_, style, accept)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (on)
+import Json.Decode as JD
 import Native.FileReader
+import Task exposing (attempt)
 
 
 -- Model
 
 
+type ImageData e s
+    = NotLoaded
+    | Loading
+    | Error e
+    | Success s
+
+
 type alias Model =
-    { imageBinary : Maybe String }
+    { imageData : ImageData String String }
 
 
 initialModel : Model
 initialModel =
-    { imageBinary = Nothing }
+    { imageData = NotLoaded }
 
 
 
@@ -23,7 +32,8 @@ initialModel =
 
 
 type Msg
-    = NoOp
+    = FileSelected JD.Value
+    | FileLoaded (Result String String)
 
 
 
@@ -33,8 +43,19 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            model ! []
+        FileSelected event ->
+            { model | imageData = Loading } ! [ loadFile event ]
+
+        FileLoaded (Ok binary) ->
+            { model | imageData = Success binary } ! []
+
+        FileLoaded (Err error) ->
+            { model | imageData = Error error } ! []
+
+
+loadFile : JD.Value -> Cmd Msg
+loadFile =
+    Native.FileReader.readFile >> attempt FileLoaded
 
 
 
@@ -45,10 +66,11 @@ view : Model -> Html Msg
 view model =
     section
         [ sectionStyles ]
-        [ imageView model.imageBinary
+        [ imageView model.imageData
         , input
             [ type_ "file"
             , accept "image/*"
+            , on "change" <| JD.map FileSelected JD.value
             ]
             []
         ]
@@ -65,18 +87,33 @@ sectionStyles =
         ]
 
 
-imageView : Maybe String -> Html Msg
-imageView maybeImageBinary =
-    case maybeImageBinary of
-        Just imageBinary ->
+imageView : ImageData String String -> Html Msg
+imageView imageData =
+    case imageData of
+        NotLoaded ->
             p
                 []
-                [ text "Image will be rendered here" ]
+                [ text "Choose an image file using the selector below..." ]
 
-        Nothing ->
+        Loading ->
             p
                 []
-                [ text "No image selected yet" ]
+                [ text "Loading..." ]
+
+        Error error ->
+            p
+                []
+                [ text error ]
+
+        Success binary ->
+            img
+                [ style
+                    [ ( "max-height", "300px" )
+                    , ( "margin-bottom", "3rem" )
+                    ]
+                , src binary
+                ]
+                []
 
 
 
