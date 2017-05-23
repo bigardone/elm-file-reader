@@ -13,26 +13,6 @@
 
       if (elmDiv) {
         const app = Elm.Main.embed(elmDiv);
-
-        app.ports.fileSelected.subscribe(function (e) {
-          const input = e.target;
-          const file = input.files[0];
-          const reader = new FileReader();
-
-          reader.onload = (function (event) {
-            const binary = event.target.result;
-
-            console.log('Binary size', binary.length);
-
-            app.ports.fileLoaded.send(binary);
-          });
-
-          reader.onerror = (function (err) {
-            console.error(err);
-          });
-
-          reader.readAsDataURL(file);
-        });
       }
     </script>
   </body>
