@@ -11,7 +11,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FileSelected event ->
-            { model | imageData = Loading } ! [ loadFile event ]
+            { model | imageData = Loading } ! [ readFile event ]
 
         FileLoaded (Ok binary) ->
             { model | imageData = Success binary } ! []
@@ -20,6 +20,6 @@ update msg model =
             { model | imageData = Error error } ! []
 
 
-loadFile : JD.Value -> Cmd Msg
-loadFile =
+readFile : JD.Value -> Cmd Msg
+readFile =
     Native.FileReader.readFile >> Task.attempt FileLoaded
