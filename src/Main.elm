@@ -3,7 +3,6 @@ module Main exposing (..)
 import Html exposing (Html)
 import Messages exposing (Msg(..))
 import Model exposing (Model, initialModel)
-import Subscriptions exposing (subscriptions)
 import Update exposing (update)
 import View exposing (view)
 
@@ -19,5 +18,5 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions = (\_ -> Sub.none)
         }

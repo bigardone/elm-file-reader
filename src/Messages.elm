@@ -5,4 +5,4 @@ import Json.Decode as JD
 
 type Msg
     = FileSelected JD.Value
-    | FileLoaded String
+    | FileLoaded (Result String String)
