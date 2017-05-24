@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Elm FileReader</title>
+  </head>
+
+  <body>
+    <div id="main"></div>
+    <script src="main.js"></script>
+    <script>
+      const elmDiv = document.querySelector('#main');
+
+      if (elmDiv) {
+        const app = Elm.Main.embed(elmDiv);
+
+        app.ports.fileSelected.subscribe(function (e) {
+          const input = e.target;
+          const file = input.files[0];
+          const reader = new FileReader();
+
+          reader.onload = (function (event) {
+            const binary = event.target.result;
+
+            console.log('Binary size', binary.length);
+
+            app.ports.fileLoaded.send(binary);
+          });
+
+          reader.onerror = (function (err) {
+            console.error(err);
+          });
+
+          reader.readAsDataURL(file);
+        });
+      }
+    </script>
+  </body>
+</html>
